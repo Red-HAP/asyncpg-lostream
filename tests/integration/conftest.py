@@ -19,15 +19,9 @@ import pytest_asyncio
 import sqlalchemy.event
 import sqlalchemy.future
 import sqlalchemy.pool
-# from fastapi import FastAPI
-# from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# from eda_server.config import load_settings
-
-# from .utils.app import create_test_app
-# from .utils.db import create_database, drop_database, upgrade_database
 from .utils.db import create_database, drop_database
 
 
@@ -45,7 +39,6 @@ def event_loop():
 @pytest.fixture(scope="session")
 def default_settings():
     return Settings
-    # return load_settings()
 
 
 @pytest_asyncio.fixture(scope="session")
@@ -77,9 +70,6 @@ async def db_engine(default_engine, db_url):
         future=True,
     )
 
-    # async with engine.connect() as connection:
-    #     await upgrade_database(connection)
-
     yield engine
 
     await engine.dispose()
@@ -98,9 +88,7 @@ async def db(db_engine):
 
         async with session_factory(bind=connection) as session:
 
-            @sqlalchemy.event.listens_for(
-                session.sync_session, "after_transaction_end"
-            )
+            @sqlalchemy.event.listens_for(session.sync_session, "after_transaction_end")
             def reopen_nested_transaction(_session, _transaction):
                 if connection.closed:
                     return
@@ -111,15 +99,3 @@ async def db(db_engine):
             yield session
 
             await transaction.rollback()
-
-
-# @pytest_asyncio.fixture
-# async def app(default_settings, db, db_url):
-#     settings = default_settings.copy(update={"database_url": db_url})
-#     return await create_test_app(settings, db)
-
-
-# @pytest_asyncio.fixture
-# async def client(app: FastAPI):
-#     async with AsyncClient(app=app, base_url="http://testserver") as client:
-#         yield client

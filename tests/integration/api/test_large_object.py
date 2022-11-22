@@ -16,7 +16,6 @@ from io import BytesIO
 
 import faker
 import pytest
-# from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from asyncpg_lostream.lostream import (
@@ -55,7 +54,6 @@ def decode_bytes_buff(buff: bytes):
     return obuff, buff[convlen:]
 
 
-# async def test_factory_get_nonexist_lob(client: AsyncClient, db: AsyncSession):
 async def test_factory_get_nonexist_lob(db: AsyncSession):
     with pytest.raises(PGLargeObjectNotFound):
         lob = PGLargeObject(db, 0, "r")
@@ -72,7 +70,6 @@ async def test_factory_get_nonexist_lob(db: AsyncSession):
     assert not exists
 
 
-# async def test_factory_get_exist_lob(client: AsyncClient, db: AsyncSession):
 async def test_factory_get_exist_lob(db: AsyncSession):
     oid = await PGLargeObject.create_large_object(db)
     assert oid > 0
@@ -89,7 +86,6 @@ async def test_factory_get_exist_lob(db: AsyncSession):
     assert not exists
 
 
-# async def test_lob_attributes(client: AsyncClient, db: AsyncSession):
 async def test_lob_attributes(db: AsyncSession):
     lob = PGLargeObject(db, 0, "w")
     await lob.open()
@@ -118,7 +114,6 @@ async def test_lob_attributes(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_closed_check(client: AsyncClient, db: AsyncSession):
 async def test_lob_io_closed_check(db: AsyncSession):
     oid = None
     async with PGLargeObject(db, 0, "w") as lob:
@@ -131,9 +126,6 @@ async def test_lob_io_closed_check(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_unsupported_checks(
-#     client: AsyncClient, db: AsyncSession
-# ):
 async def test_lob_io_unsupported_checks(db: AsyncSession):
     lob = PGLargeObject(db, 0, "w")
     await lob.open()
@@ -159,7 +151,6 @@ async def test_lob_io_unsupported_checks(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_re_read(client: AsyncClient, db: AsyncSession):
 async def test_lob_io_re_read(db: AsyncSession):
     oid = rbuff = None
     async with PGLargeObject(db, 0, "w") as lob:
@@ -177,9 +168,6 @@ async def test_lob_io_re_read(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_read_full_and_chunked(
-#     client: AsyncClient, db: AsyncSession
-# ):
 async def test_lob_io_read_full_and_chunked(db: AsyncSession):
     oid = rbuff = None
     async with PGLargeObject(db, 0, "w") as lob:
@@ -223,7 +211,6 @@ async def test_lob_io_read_full_and_chunked(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_txt_with_emoji(client: AsyncClient, db: AsyncSession):
 async def test_lob_io_txt_with_emoji(db: AsyncSession):
     write_buffer = WRITE_BUFFER + "✨ 🍰 ✨"
     write_buffer_bin = write_buffer.encode()
@@ -239,9 +226,6 @@ async def test_lob_io_txt_with_emoji(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_io_encoded_char_partial_read(
-#     client: AsyncClient, db: AsyncSession
-# ):
 async def test_lob_io_encoded_char_partial_read(db: AsyncSession):
     write_buffer = WRITE_BUFFER + "✨ 🍰 ✨"
     write_buffer_bin = write_buffer.encode()
@@ -263,9 +247,6 @@ async def test_lob_io_encoded_char_partial_read(db: AsyncSession):
     await PGLargeObject.delete_large_object(db, [oid])
 
 
-# async def test_lob_write_from_stream_read(
-#     client: AsyncClient, db: AsyncSession
-# ):
 async def test_lob_write_from_stream_read(db: AsyncSession):
     stdout = BytesIO()
     for chunk in _profile_generator():
