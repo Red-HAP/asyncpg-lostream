@@ -95,10 +95,13 @@ async with PGLargeObject(async_connection, existing_lob_oid, "r") as pgl:
 
 ### Development
 
+Start a local PostgreSQL container using `docker-compose -f ./docker/docker-compose.yml up -d`
+
 After making changes, create your unit tests in the `asyncpg-lostream/tests` directory.
 
 Test your changes with the command `python -m pytest`
 
+Shutdown the local PostgreSQL container `docker-compose -f ./docker/docker-compose.yml down -v`
 
 ## Packaging
 
