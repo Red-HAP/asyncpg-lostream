@@ -1,0 +1,5 @@
+[flake8]
+ignore = D101, D102, D105, D107, D401, D400
+max-line-length = 120
+count = true
+show-source = true

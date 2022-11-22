@@ -1,0 +1,9 @@
+anyio
+asyncio
+faker
+pre-commit
+asyncpg
+psycopg2-binary
+sqlalchemy[mypy] >= 1.4
+pytest
+pytest-asyncio
