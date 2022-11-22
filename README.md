@@ -98,3 +98,10 @@ async with PGLargeObject(async_connection, existing_lob_oid, "r") as pgl:
 After making changes, create your unit tests in the `asyncpg-lostream/tests` directory.
 
 Test your changes with the command `python -m pytest`
+
+
+## Packaging
+
+Build the package using `python -m build`. This will put built packages into the `dist/` directory.
+
+For instructions on upload to PyPI, see the [Packaging Python Projects Dcoumentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/#uploading-the-distribution-archives)
