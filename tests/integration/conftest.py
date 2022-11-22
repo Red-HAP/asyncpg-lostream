@@ -16,17 +16,27 @@ import asyncio
 
 import pytest
 import pytest_asyncio
+import sqlalchemy as sa
 import sqlalchemy.event
 import sqlalchemy.future
 import sqlalchemy.pool
-from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
+from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-from .utils.db import create_database, drop_database
+# from .utils.db import create_database, drop_database
 
 
 class Settings:
     database_url = "postgresql+asyncpg://postgres:secret@localhost:5432/postgres"
+
+
+async def drop_database(connection: AsyncConnection, name: str):
+    await connection.execute(sa.text(f'DROP DATABASE IF EXISTS "{name}"'))
+
+
+async def create_database(connection: AsyncConnection, name: str):
+    await drop_database(connection, name)
+    await connection.execute(sa.text(f'CREATE DATABASE "{name}"'))
 
 
 @pytest.fixture(scope="session")
