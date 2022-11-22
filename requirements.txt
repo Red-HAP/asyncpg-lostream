@@ -8,3 +8,4 @@ sqlalchemy[mypy] >= 1.4
 pytest
 pytest-asyncio
 twine
+build
