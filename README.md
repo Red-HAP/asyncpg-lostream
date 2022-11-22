@@ -14,6 +14,8 @@ This codebase is not tied or affiliated with asyncpg. It does utilize SQLAlchemy
 
 A large object is a special store in PostgreSQL that operates similarly to a file. The large object itself is the record. The database data type is `bytea` (`bytes` in Python). The interface operates as a read and write to the allocated large object via read and write functions. (There are more, but they are out of scope for this project.) The data type of the large object id is `oid`. The tables used by PostgreSQL are `pg_largeobject` and `pg_largeobject_metadata`. The `pg_largeobject` table holds the data itself. The `pg_largeobject_metadata` has a link to the owner oid. These two tables are linked by the `oid` reference.
 
+When assiciating the large object to a table record, add an `oid` type column to hold the allocated large object `oid` value from a created large object.
+
 See the PostgreSQL documentation [here](https://www.postgresql.org/docs/current/largeobjects.html).
 
 ## Utilization
@@ -65,3 +67,34 @@ async with PGLargeObject(async_connection, existing_lob_oid, "r") as pgl:
     async for buff in pgl:
         print(buff.decode())
 ```
+
+## Development
+
+### Environment
+
+1. Create a virtual environment
+    ```bash
+    python -m venv /path/to/venv
+    ```
+2. Activate the virtual environment
+    ```bash
+    source /path/to/venv/bin/activate
+    ```
+3. Ensure pip is up to date
+    ```bash
+    pip install --upgrade pip
+    ```
+4. Install packages from `requirements.txt`
+    ```bash
+    pip install -r requirements.txt
+    ```
+5. Install `pre-config`
+   ```bash
+   pre-config install
+   ```
+
+### Development
+
+After making changes, create your unit tests in the `asyncpg-lostream/tests` directory.
+
+Test your changes with the command `python -m pytest`
