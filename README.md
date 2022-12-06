@@ -95,16 +95,22 @@ async with PGLargeObject(async_connection, existing_lob_oid, "r") as pgl:
 
 ### Development
 
-Start a local PostgreSQL container using `docker-compose -f ./docker/docker-compose.yml up -d`
+`make`, `docker-compose` and `docker` are required for development.
+
+To list the make targets, use `make help`
+
+To start a local PostgreSQL 13 container: `make start_db`
+
+To shutdown the local PostgreSQL 13 container: `make stop_db`
 
 After making changes, create your unit tests in the `asyncpg-lostream/tests` directory.
 
-Test your changes with the command `python -m pytest`
-
-Shutdown the local PostgreSQL container `docker-compose -f ./docker/docker-compose.yml down -v`
+Test your changes with the command `make test`
 
 ## Packaging
 
-Build the package using `python -m build`. This will put built packages into the `dist/` directory.
+If you intend to make a releaase, change the version in the `setup.cfg` file. This value will be copied to the module's `__version__` file.
+
+Build the package using `make build`. This will run the tests and then build the artifacts. These will be put into the `dist/` directory.
 
 For instructions on upload to PyPI, see the [Packaging Python Projects Dcoumentation](https://packaging.python.org/en/latest/tutorials/packaging-projects/#uploading-the-distribution-archives)

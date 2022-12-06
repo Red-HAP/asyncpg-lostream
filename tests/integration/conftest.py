@@ -23,8 +23,6 @@ import sqlalchemy.pool
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncSession, create_async_engine
 from sqlalchemy.orm import sessionmaker
 
-# from .utils.db import create_database, drop_database
-
 
 class Settings:
     database_url = "postgresql+asyncpg://postgres:secret@localhost:5432/postgres"

@@ -15,7 +15,7 @@
 from __future__ import annotations
 
 import logging
-from typing import AsyncIterator, List, Optional, Tuple, Union
+from typing import AsyncIterator, List, Optional, Tuple
 
 from sqlalchemy import column, func, select, text
 from sqlalchemy.dialects.postgresql import ARRAY, OID, array
@@ -35,6 +35,7 @@ CHUNK_SIZE = 1024**2
 
 class PGLargeObjectError(Exception):
     """Base PGLargeObject Exception"""
+
     pass
 
 
@@ -100,9 +101,7 @@ class PGLargeObject:
     ):
         self.session = session
         if chunk_size <= 0:
-            raise ValueError(
-                "chunk_size must be an integer greater than zero."
-            )
+            raise ValueError("chunk_size must be an integer greater than zero.")
         self.chunk_size = chunk_size
         self.oid = oid
         self.closed = False
@@ -130,9 +129,7 @@ class PGLargeObject:
     def resolve_mode(mode: str) -> Tuple[int, bool]:
         """Translates string mode to the proper binary setting."""
         if mode not in VALID_MODES:
-            raise ValueError(
-                f"Mode {mode} must be one of {sorted(VALID_MODES)}"
-            )
+            raise ValueError(f"Mode {mode} must be one of {sorted(VALID_MODES)}")
 
         append = mode.startswith("a")
         imode = 0
@@ -147,23 +144,16 @@ class PGLargeObject:
         sql = select(func.lo_create(0).label("loid"))
         oid = await session.scalar(sql)
         if oid == 0:
-            raise PGLargeObjectNotCreated(
-                "Requested large object was not created."
-            )
+            raise PGLargeObjectNotCreated("Requested large object was not created.")
+        LOG.debug(f"Created large object with oid = {oid}")
         return oid
 
     @staticmethod
-    async def verify_large_object(
-        session: AsyncSession, oid: int
-    ) -> Tuple[bool, int]:
+    async def verify_large_object(session: AsyncSession, oid: int) -> Tuple[bool, int]:
         """Verify that a large object exists. Returns oid and size."""
         sel_cols = [
             column("oid"),
-            sum_(
-                func.length(
-                    coalesce(text("data"), func.convert_to("", "utf-8"))
-                )
-            ).label("data_length"),
+            sum_(func.length(coalesce(text("data"), func.convert_to("", "utf-8")))).label("data_length"),
         ]
         sql = (
             select(sel_cols)
@@ -182,15 +172,14 @@ class PGLargeObject:
         return rec
 
     @staticmethod
-    async def delete_large_object(
-        session: AsyncSession, oids: List[int]
-    ) -> None:
+    async def delete_large_object(session: AsyncSession, oids: List[int]) -> None:
         """Deletes large objects. This will deallocate the large object oids specified."""
         if oids and all(o > 0 for o in oids):
             sql = select(func.lo_unlink(text("oid"))).select_from(
                 func.unnest(array(oids, type_=ARRAY(OID))).alias("oid")
             )
             await session.execute(sql)
+            LOG.debug(f"Deleted large objects with these OIDs: {oids}")
 
     def closed_check(self):
         """Verify that an object interface is closed."""
@@ -202,9 +191,7 @@ class PGLargeObject:
         self.closed_check()
 
         if self.imode == INV_WRITE:
-            raise PGLargeObjectUnsupportedOp(
-                "Large Object class instance is set for write only"
-            )
+            raise PGLargeObjectUnsupportedOp("Large Object class instance is set for write only")
 
         _chunk_size = chunk_size or self.chunk_size
 
@@ -222,7 +209,7 @@ class PGLargeObject:
         start = 0
         chunk = None
         while True:
-            chunk = buffer[start:(start + chunk_size)]
+            chunk = buffer[start : (start + chunk_size)]  # noqa: E203
             if not chunk:
                 break
             start += chunk_size
@@ -233,9 +220,7 @@ class PGLargeObject:
         self.closed_check()
 
         if self.imode == INV_READ:
-            raise PGLargeObjectUnsupportedOp(
-                "Large Object class instance is set for read only"
-            )
+            raise PGLargeObjectUnsupportedOp("Large Object class instance is set for read only")
 
         if not buff:
             return 0
@@ -260,13 +245,13 @@ class PGLargeObject:
         if self.imode == INV_READ:
             raise PGLargeObjectUnsupportedOp("not writeable")
 
-        open_sql = select(func.lo_open(self.oid, self.imode))
-        fd = await self.session.scalar(open_sql)
-
-        trunc_sql = select(func.lo_truncate(fd, self.pos))
-        await self.session.execute(trunc_sql)
-
-        close_sql = select(func.lo_close(fd))
+        open_cte = select(func.lo_open(self.oid, self.imode).label("descriptor")).cte("fd")
+        trunc_cte = (
+            select(func.lo_truncate(open_cte.c.descriptor, self.pos).label("res"), open_cte.c.descriptor)
+            .select_from(open_cte)
+            .cte("trnc")
+        )
+        close_sql = select(func.lo_close(trunc_cte.c.descriptor)).select_from(trunc_cte)
         await self.session.execute(close_sql)
 
         self.length = self.pos
@@ -288,9 +273,7 @@ class PGLargeObject:
             self.length = length
         else:
             if not self.imode & INV_WRITE:
-                raise PGLargeObjectNotFound(
-                    f"Large object with oid {self.oid} does not exist."
-                )
+                raise PGLargeObjectNotFound(f"Large object with oid {self.oid} does not exist.")
             else:
                 self.oid = await self.create_large_object(self.session)
                 self.length = self.pos = 0
