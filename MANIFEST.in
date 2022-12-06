@@ -1,0 +1,1 @@
+include src/asyncpg_lostream/__version__

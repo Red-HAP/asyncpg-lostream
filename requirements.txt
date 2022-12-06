@@ -9,3 +9,7 @@ pytest
 pytest-asyncio
 twine
 build
+wheel
+configparser
+packaging
+
